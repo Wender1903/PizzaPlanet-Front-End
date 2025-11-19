@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍕 Pizza Planet - Sistema Interno de Gestão de Cardápio e Pedidos
 
-## Getting Started
+[![React](https://img.shields.io/badge/React-17.0.2-blue?logo=react)](https://reactjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-13-black?logo=next.js)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.3.3-blue?logo=tailwind-css)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-First, run the development server:
+Pizza Planet é um sistema interno em **Next.js** para gerenciamento de cardápio e pedidos de pizzaria. Permite cadastrar, editar e remover pizzas, além de criar, atualizar e finalizar pedidos com interface moderna e intuitiva.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 💻 Funcionalidades
+
+- **Home:** Página inicial com informações do sistema e botões de acesso rápido para Cardápio e Pedidos.
+- **Cardápio:** 
+  - Cadastrar, editar e remover pizzas.
+  - Campos obrigatórios: Nome, Descrição, Preço e Imagem.
+- **Pedidos:** 
+  - Criar e atualizar pedidos.
+  - Selecionar pizzas e quantidade.
+  - Finalizar pedidos.
+  - Filtrar pedidos por status: Todos, Em execução, Finalizados.
+  - Modal com total do pedido e verificação de campos obrigatórios.
+
+---
+
+## 🗂 Estrutura do Projeto
+```
+app/
+├─ page.tsx # Página inicial
+├─ cardapio.tsx # Página de gerenciamento de cardápio
+└─ pedido.tsx # Página de gerenciamento de pedidos
+
+data/
+└─ cardapio.js # Base inicial do cardápio
+
+components/
+└─ Header.tsx # Componente de header/navegação
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Como Executar
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/pizza-planet.git
+```
 
-## Learn More
+2. Acesse o projeto:
+```bash
+cd pizza-planet
+```
 
-To learn more about Next.js, take a look at the following resources:
+3. Instale as dependências:
+```bash
+npm install
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Rode o projeto em modo de desenvolvimento:
+```bash
+npm run dev
+```
+5. Abra no navegador:
+```bash
+http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+##🎨 Layout e Design
 
-## Deploy on Vercel
+- Design moderno com cores preto e verde neon.
+- Cards com animação "float" para pizzas.
+- Layout responsivo, otimizado para desktop e mobile.
+- Modal interativo para criação/edição de pedidos.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📸 Screenshots
+- Home
+- Cardápio
+- Pedidos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+⚙️ Observações
+
+- Projeto front-end sem integração real com API.
+- Dados armazenados localmente em estado React.
+- Ideal para estudo de Next.js, Tailwind CSS e gerenciamento de estado.
