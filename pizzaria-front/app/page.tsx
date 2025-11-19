@@ -2,7 +2,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-950 p-[clamp(20px,2vw,80px)]">
 
-      {/* SEÇÃO PRINCIPAL */}
       <div className="w-full bg-gray-1050 shadow-2xl shadow-green-500/40 rounded-lg 
       p-[clamp(40px,4vw,100px)] flex min-h-[calc(100vh-200px)]">
 

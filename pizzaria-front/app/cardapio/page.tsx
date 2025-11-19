@@ -6,13 +6,11 @@ import { useState } from "react";
 export default function CardapioPage() {
   const [cardapio, setCardapio] = useState(cardapioInicial);
 
-  // Form state
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState("");
   const [img, setImg] = useState("");
 
-  // Edição
   const [editId, setEditId] = useState<number | null>(null);
 
   function handleSubmit(e: React.FormEvent) {
