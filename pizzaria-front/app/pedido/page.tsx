@@ -24,7 +24,6 @@ type Pedido = {
 export default function PedidoPage() {
     const [showModal, setShowModal] = useState(false);
     const [editPedido, setEditPedido] = useState<Pedido | null>(null);
-
     const [nomeCliente, setNomeCliente] = useState("");
     const [selectedPizza, setSelectedPizza] = useState<Pizza | null>(null);
     const [quantidade, setQuantidade] = useState(1);
@@ -34,26 +33,15 @@ export default function PedidoPage() {
 
     useEffect(() => {
         const handleEsc = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                fecharModal();
-            }
+            if (event.key === "Escape") fecharModal();
         };
-        if (showModal) {
-            window.addEventListener("keydown", handleEsc);
-        }
+        if (showModal) window.addEventListener("keydown", handleEsc);
         return () => window.removeEventListener("keydown", handleEsc);
     }, [showModal]);
 
     function adicionarAoPedido() {
-        if (!selectedPizza) {
-            alert("Adicione uma pizza!");
-            return;
-        }
-        if (quantidade < 1) {
-            alert("Selecione uma quantidade válida!");
-            return;
-        }
-
+        if (!selectedPizza) return alert("Adicione uma pizza!");
+        if (quantidade < 1) return alert("Selecione uma quantidade válida!");
         const existe = pedidoItens.find((p) => p.pizza.id === selectedPizza.id);
         if (existe) {
             setPedidoItens(
@@ -66,7 +54,6 @@ export default function PedidoPage() {
         } else {
             setPedidoItens([...pedidoItens, { pizza: selectedPizza, quantidade }]);
         }
-
         setSelectedPizza(null);
         setQuantidade(1);
     }
@@ -96,18 +83,9 @@ export default function PedidoPage() {
     }
 
     function salvarPedido() {
-        if (!nomeCliente.trim()) {
-            alert("Escreva o nome da comanda!");
-            return;
-        }
-        if (pedidoItens.length === 0) {
-            alert("Adicione ao menos uma pizza!");
-            return;
-        }
-        if (pedidoItens.some(item => item.quantidade < 1)) {
-            alert("Selecione uma quantidade válida para todos os itens!");
-            return;
-        }
+        if (!nomeCliente.trim()) return alert("Escreva o nome da comanda!");
+        if (pedidoItens.length === 0) return alert("Adicione ao menos uma pizza!");
+        if (pedidoItens.some(item => item.quantidade < 1)) return alert("Selecione uma quantidade válida para todos os itens!");
 
         if (editPedido) {
             setPedidos(
@@ -126,7 +104,6 @@ export default function PedidoPage() {
             };
             setPedidos([...pedidos, novoPedido]);
         }
-
         fecharModal();
     }
 
@@ -211,7 +188,7 @@ export default function PedidoPage() {
             </div>
 
             {pedidosFiltrados.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center items-center">
+                <div className="flex flex-wrap justify-center gap-8">
                     {pedidosFiltrados.map((p) => {
                         const total = p.itens.reduce(
                             (acc, item) => acc + item.pizza.preco * item.quantidade,
