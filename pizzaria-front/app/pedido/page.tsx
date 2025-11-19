@@ -1,142 +1,359 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cardapio as cardapioInicial } from "@/data/cardapio";
 
 type Pizza = {
-  id: number;
-  nome: string;
-  preco: number;
+    id: number;
+    nome: string;
+    preco: number;
 };
 
 type PedidoItem = {
-  pizza: Pizza;
-  quantidade: number;
+    pizza: Pizza;
+    quantidade: number;
+};
+
+type Pedido = {
+    id: number;
+    nomeCliente: string;
+    itens: PedidoItem[];
+    finalizado: boolean;
 };
 
 export default function PedidoPage() {
-  const [showModal, setShowModal] = useState(false);
-  const [selectedPizza, setSelectedPizza] = useState<Pizza | null>(null);
-  const [quantidade, setQuantidade] = useState(1);
-  const [pedidoItens, setPedidoItens] = useState<PedidoItem[]>([]);
+    const [showModal, setShowModal] = useState(false);
+    const [editPedido, setEditPedido] = useState<Pedido | null>(null);
 
-  function adicionarAoPedido() {
-    if (!selectedPizza) return;
+    const [nomeCliente, setNomeCliente] = useState("");
+    const [selectedPizza, setSelectedPizza] = useState<Pizza | null>(null);
+    const [quantidade, setQuantidade] = useState(1);
+    const [pedidoItens, setPedidoItens] = useState<PedidoItem[]>([]);
+    const [pedidos, setPedidos] = useState<Pedido[]>([]);
 
-    const existe = pedidoItens.find((p) => p.pizza.id === selectedPizza.id);
-    if (existe) {
-      setPedidoItens(
-        pedidoItens.map((p) =>
-          p.pizza.id === selectedPizza.id
-            ? { ...p, quantidade: p.quantidade + quantidade }
-            : p
-        )
-      );
-    } else {
-      setPedidoItens([...pedidoItens, { pizza: selectedPizza, quantidade }]);
+    useEffect(() => {
+        const handleEsc = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                fecharModal();
+            }
+        };
+        if (showModal) {
+            window.addEventListener("keydown", handleEsc);
+        }
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, [showModal]);
+
+    function adicionarAoPedido() {
+        if (!selectedPizza) {
+            alert("Adicione uma pizza!");
+            return;
+        }
+        if (quantidade < 1) {
+            alert("Selecione uma quantidade válida!");
+            return;
+        }
+
+        const existe = pedidoItens.find((p) => p.pizza.id === selectedPizza.id);
+        if (existe) {
+            setPedidoItens(
+                pedidoItens.map((p) =>
+                    p.pizza.id === selectedPizza.id
+                        ? { ...p, quantidade: p.quantidade + quantidade }
+                        : p
+                )
+            );
+        } else {
+            setPedidoItens([...pedidoItens, { pizza: selectedPizza, quantidade }]);
+        }
+
+        setSelectedPizza(null);
+        setQuantidade(1);
     }
 
-    setSelectedPizza(null);
-    setQuantidade(1);
-  }
+    function removerItem(id: number) {
+        setPedidoItens(pedidoItens.filter((item) => item.pizza.id !== id));
+    }
 
-  function removerItem(id: number) {
-    setPedidoItens(pedidoItens.filter((item) => item.pizza.id !== id));
-  }
+    function aumentarQtd(id: number) {
+        setPedidoItens(
+            pedidoItens.map((item) =>
+                item.pizza.id === id
+                    ? { ...item, quantidade: item.quantidade + 1 }
+                    : item
+            )
+        );
+    }
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black via-gray-900 to-gray-800 p-6 text-white">
-      <h1 className="text-4xl font-extrabold text-green-400 mb-6">Pedidos 🚀</h1>
+    function diminuirQtd(id: number) {
+        setPedidoItens(
+            pedidoItens.map((item) =>
+                item.pizza.id === id
+                    ? { ...item, quantidade: item.quantidade > 1 ? item.quantidade - 1 : 1 }
+                    : item
+            )
+        );
+    }
 
-      <button
-        onClick={() => setShowModal(true)}
-        className="px-6 py-3 bg-green-500 text-black font-bold rounded-md hover:bg-green-400 transition-all"
-      >
-        Criar Pedido
-      </button>
+    function salvarPedido() {
+        if (!nomeCliente.trim()) {
+            alert("Escreva o nome da comanda!");
+            return;
+        }
+        if (pedidoItens.length === 0) {
+            alert("Adicione ao menos uma pizza!");
+            return;
+        }
+        if (pedidoItens.some(item => item.quantidade < 1)) {
+            alert("Selecione uma quantidade válida para todos os itens!");
+            return;
+        }
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-black/90 p-6 rounded-xl w-96 shadow-lg border border-green-500/30">
-            <h2 className="text-2xl font-bold text-green-300 mb-4 text-center">
-              Novo Pedido
-            </h2>
+        if (editPedido) {
+            setPedidos(
+                pedidos.map((p) =>
+                    p.id === editPedido.id
+                        ? { ...p, nomeCliente, itens: pedidoItens }
+                        : p
+                )
+            );
+        } else {
+            const novoPedido: Pedido = {
+                id: pedidos.length + 1,
+                nomeCliente,
+                itens: pedidoItens,
+                finalizado: false,
+            };
+            setPedidos([...pedidos, novoPedido]);
+        }
 
-            <div className="mb-4">
-              <label className="block text-sm font-semibold text-white mb-1">
-                Selecionar Pizza
-              </label>
-              <select
-                value={selectedPizza?.id || ""}
-                onChange={(e) => {
-                  const pizza = cardapioInicial.find(
-                    (p) => p.id === Number(e.target.value)
-                  );
-                  setSelectedPizza(pizza || null);
-                }}
-                className="w-full p-2 rounded-md bg-gray-800 text-white border border-green-500/20 focus:border-green-400"
-              >
-                <option value="">-- Selecione --</option>
-                {cardapioInicial.map((pizza) => (
-                  <option key={pizza.id} value={pizza.id}>
-                    {pizza.nome} - R$ {pizza.preco.toFixed(2)}
-                  </option>
-                ))}
-              </select>
+        fecharModal();
+    }
+
+    function fecharModal() {
+        setShowModal(false);
+        setEditPedido(null);
+        setNomeCliente("");
+        setPedidoItens([]);
+        setSelectedPizza(null);
+        setQuantidade(1);
+    }
+
+    function editarPedido(pedido: Pedido) {
+        setEditPedido(pedido);
+        setNomeCliente(pedido.nomeCliente);
+        setPedidoItens(pedido.itens);
+        setShowModal(true);
+    }
+
+    function finalizarPedido(id: number) {
+        setPedidos(
+            pedidos.map((p) =>
+                p.id === id ? { ...p, finalizado: true } : p
+            )
+        );
+    }
+
+    const totalPedido = pedidoItens.reduce(
+        (acc, item) => acc + item.pizza.preco * item.quantidade,
+        0
+    );
+
+    return (
+        <div className="min-h-screen p-6 bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white">
+            <h1 className="text-4xl font-extrabold text-green-400 mb-6 text-center">
+                Pedidos 🚀
+            </h1>
+
+            <div className="flex justify-center mb-6">
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="px-6 py-3 bg-green-500 text-black font-bold rounded-md hover:bg-green-400 transition-all"
+                >
+                    Criar Pedido
+                </button>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-semibold text-white mb-1">
-                Quantidade
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={quantidade}
-                onChange={(e) => setQuantidade(Number(e.target.value))}
-                className="w-full p-2 rounded-md bg-gray-800 text-white border border-green-500/20 focus:border-green-400"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center items-center">
+                {pedidos.map((p) => {
+                    const total = p.itens.reduce(
+                        (acc, item) => acc + item.pizza.preco * item.quantidade,
+                        0
+                    );
+                    return (
+                        <div
+                            key={p.id}
+                            className="w-[360px] h-[420px] bg-black/80 p-5 rounded-lg border border-green-500/30 shadow-md relative flex flex-col justify-evenly">
+                            <div className="flex justify-between items-start mb-3">
+                                <h3 className="font-semibold text-green-300 text-lg">{p.nomeCliente}</h3>
+                                <button onClick={() => editarPedido(p)} className="px-2 py-1 bg-green-500 text-black rounded text-sm hover:bg-green-400 transition-all" >
+                                    ✏️
+                                </button>
+                            </div>
+
+                            <p className="text-sm text-white/70 mb-3">ID: {p.id}</p>
+
+                            <ul className="mb-3 text-sm">
+                                {p.itens.map((item, index) => (
+                                    <li
+                                        key={item.pizza.id}
+                                        className="flex justify-between text-white/80 mb-1"
+                                    >
+                                        {index + 1}. {item.pizza.nome} x {item.quantidade}
+                                        <span>R$ {(item.pizza.preco * item.quantidade).toFixed(2)}</span>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <div className="text-right font-bold text-green-400 text-base mb-3">
+                                Total: R$ {total.toFixed(2)}
+                            </div>
+
+                            {!p.finalizado ? (
+                                <button
+                                    onClick={() => finalizarPedido(p.id)}
+                                    className="w-full py-2 bg-green-500 text-black font-bold rounded-md text-sm hover:bg-green-400 transition-all"
+                                >
+                                    Finalizar
+                                </button>
+                            ) : (
+                                <span className="text-sm text-gray-400 font-semibold">
+                                    Finalizado ✅
+                                </span>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
-            <div className="flex justify-between">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-500 transition-all"
-              >
-                Cancelar
-              </button>
+            {showModal && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+                    <div className="bg-black/90 rounded-xl shadow-lg border border-green-500/30 flex">
+                        <div className="w-[494px] h-[489px] bg-green-500 flex items-center justify-center">
+                            <img
+                                src="https://i.pinimg.com/564x/99/25/2c/99252cb5b21cb53519e76360498a4ad8.jpg"
+                                alt="Pizza Decorativa"
+                                className="w-full h-full object-cover rounded-l-xl"
+                            />
+                        </div>
 
-              <button
-                onClick={adicionarAoPedido}
-                className="px-4 py-2 bg-green-500 text-black font-bold rounded-md hover:bg-green-400 transition-all"
-              >
-                Adicionar
-              </button>
-            </div>
+                        <div className="w-[494px] h-[489px] p-6 flex flex-col justify-between">
+                            <h2 className="text-2xl font-bold text-green-300 mb-4 text-center">
+                                {editPedido ? "Editar Pedido" : "Novo Pedido"}
+                            </h2>
 
-            {pedidoItens.length > 0 && (
-              <div className="mt-4 max-h-40 overflow-y-auto">
-                {pedidoItens.map((item) => (
-                  <div
-                    key={item.pizza.id}
-                    className="flex justify-between items-center mb-2 p-1 border-b border-green-500/20"
-                  >
-                    <p className="text-sm text-green-300">
-                      {item.pizza.nome} x {item.quantidade}
-                    </p>
-                    <button
-                      onClick={() => removerItem(item.pizza.id)}
-                      className="px-2 py-0.5 bg-red-600 text-white rounded text-xs hover:bg-red-500 transition-all"
-                    >
-                      ❌
-                    </button>
-                  </div>
-                ))}
-              </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold text-white mb-1">
+                                    Nome do Cliente
+                                </label>
+                                <input
+                                    type="text"
+                                    value={nomeCliente}
+                                    onChange={(e) => setNomeCliente(e.target.value)}
+                                    className="w-full p-2 rounded-md bg-gray-800 text-white border border-green-500/20 focus:border-green-400"
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold text-white mb-1">
+                                    Selecionar Pizza
+                                </label>
+                                <select
+                                    value={selectedPizza?.id || ""}
+                                    onChange={(e) => {
+                                        const pizza = cardapioInicial.find(
+                                            (p) => p.id === Number(e.target.value)
+                                        );
+                                        setSelectedPizza(pizza || null);
+                                    }}
+                                    className="w-full p-2 rounded-md bg-gray-800 text-white border border-green-500/20 focus:border-green-400"
+                                >
+                                    <option value="">-- Selecione --</option>
+                                    {cardapioInicial.map((pizza) => (
+                                        <option key={pizza.id} value={pizza.id}>
+                                            {pizza.nome} - R$ {pizza.preco.toFixed(2)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mb-4 flex items-center gap-2">
+                                <label className="block text-sm font-semibold text-white">
+                                    Quantidade
+                                </label>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={quantidade}
+                                    onChange={(e) => setQuantidade(Math.max(1, Number(e.target.value)))}
+                                    className="w-20 p-2 rounded-md bg-gray-800 text-white border border-green-500/20 focus:border-green-400"
+                                />
+                            </div>
+
+                            <div className="flex justify-between mb-4">
+                                <button
+                                    onClick={fecharModal}
+                                    className="px-4 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-500 transition-all"
+                                >
+                                    Cancelar
+                                </button>
+
+                                <button
+                                    onClick={adicionarAoPedido}
+                                    className="px-4 py-2 bg-green-500 text-black font-bold rounded-md hover:bg-green-400 transition-all"
+                                >
+                                    Adicionar Pizza
+                                </button>
+                            </div>
+
+                            {pedidoItens.length > 0 && (
+                                <div className="max-h-40 overflow-y-auto mb-4">
+                                    {pedidoItens.map((item, index) => (
+                                        <div
+                                            key={item.pizza.id}
+                                            className="flex justify-between items-center mb-2 p-1 border-b border-green-500/20"
+                                        >
+                                            <p className="text-sm text-green-300">
+                                                {index + 1}. {item.pizza.nome} x {item.quantidade}
+                                            </p>
+                                            <div className="flex gap-1">
+                                                <button
+                                                    onClick={() => aumentarQtd(item.pizza.id)}
+                                                    className="px-2 py-0.5 bg-green-500 text-black rounded text-xs hover:bg-green-400 transition-all"
+                                                >
+                                                    ➕
+                                                </button>
+                                                <button
+                                                    onClick={() => diminuirQtd(item.pizza.id)}
+                                                    className="px-2 py-0.5 bg-yellow-500 text-black rounded text-xs hover:bg-yellow-400 transition-all"
+                                                >
+                                                    ➖
+                                                </button>
+                                                <button
+                                                    onClick={() => removerItem(item.pizza.id)}
+                                                    className="px-2 py-0.5 bg-red-600 text-white rounded text-xs hover:bg-red-500 transition-all"
+                                                >
+                                                    ❌
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="text-right font-bold text-green-400 text-base mb-2">
+                                Total: R$ {totalPedido.toFixed(2)}
+                            </div>
+
+                            <button
+                                onClick={salvarPedido}
+                                className="w-full py-2 bg-green-500 text-black font-bold rounded-md hover:bg-green-400 transition-all"
+                            >
+                                {editPedido ? "Atualizar Pedido" : "Salvar Pedido"} 🚀
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
-          </div>
         </div>
-      )}
-    </div>
-  );
+    );
 }
