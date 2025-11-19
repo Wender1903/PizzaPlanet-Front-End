@@ -67,7 +67,7 @@ npm run dev
 http://localhost:3000
 ```
 
-##🎨 Layout e Design
+## 🎨 Layout e Design
 
 - Design moderno com cores preto e verde neon.
 - Cards com animação "float" para pizzas.
@@ -83,4 +83,4 @@ http://localhost:3000
 
 - Projeto front-end sem integração real com API.
 - Dados armazenados localmente em estado React.
-- Ideal para estudo de Next.js, Tailwind CSS e gerenciamento de estado.
+- Estudo de Next.js, Tailwind CSS e gerenciamento de estado.
