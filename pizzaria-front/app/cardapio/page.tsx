@@ -1,17 +1,42 @@
-export default function Cardapio() {
-  return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-10">
-      <div className="bg-gray-900 shadow-2xl shadow-green-500/40 rounded-lg p-12 max-w-3xl text-center">
-        <h1 className="text-4xl font-extrabold text-green-400 tracking-wide mb-4">
-          Página de Cardápio
-        </h1>
+import { cardapio } from "@/data/cardapio";
 
-        <p className="text-gray-300 text-lg leading-relaxed">
-          Aqui no futuro você poderá visualizar, editar e gerenciar todos os itens do cardápio intergaláctico da Pizza Planet.
-          <br />
-          🍕✨
-        </p>
-      </div>
+export default function CardapioPage() {
+  return (
+    <div className="flex flex-wrap gap-6 p-6">
+      {cardapio.map((item) => (
+        <div
+          key={item.id}
+          className="
+            flex flex-col 
+            w-64 p-4 rounded-xl 
+            bg-black text-center 
+            shadow-[0_0_15px_rgba(0,255,0,0.3)]
+            border border-green-500/20
+          "
+        >
+          <img
+            src={item.img}
+            alt={item.nome}
+            className="
+              w-full h-40 
+              object-cover 
+              rounded-lg mb-3
+            "
+          />
+
+          <h3 className="text-xl font-semibold mb-1 text-white">
+            {item.nome}
+          </h3>
+
+          <p className="text-sm text-white/80">
+            {item.descricao}
+          </p>
+
+          <strong className="mt-3 text-lg text-green-400">
+            R$ {item.preco.toFixed(2)}
+          </strong>
+        </div>
+      ))}
     </div>
   );
 }
