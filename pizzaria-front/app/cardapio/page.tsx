@@ -2,17 +2,23 @@ import { cardapio } from "@/data/cardapio";
 
 export default function CardapioPage() {
   return (
-    <div className="flex flex-wrap gap-6 p-6">
-      {cardapio.map((item) => (
+    <div className="flex flex-wrap gap-6 p-6 justify-center">
+      {cardapio.map((item, index) => (
         <div
           key={item.id}
-          className="
+          className={`
+            float-card
             flex flex-col 
             w-64 p-4 rounded-xl 
             bg-black text-center 
             shadow-[0_0_15px_rgba(0,255,0,0.3)]
             border border-green-500/20
-          "
+            transition-all duration-300
+            hover:scale-105 hover:shadow-[0_0_25px_rgba(0,255,0,0.6)]
+          `}
+          style={{
+            animationDelay: `${index * 0.4}s`, // 🟢 delays diferentes!
+          }}
         >
           <img
             src={item.img}
