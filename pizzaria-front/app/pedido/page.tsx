@@ -30,6 +30,7 @@ export default function PedidoPage() {
     const [quantidade, setQuantidade] = useState(1);
     const [pedidoItens, setPedidoItens] = useState<PedidoItem[]>([]);
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
+    const [filtro, setFiltro] = useState<"todos" | "execucao" | "finalizados">("todos");
 
     useEffect(() => {
         const handleEsc = (event: KeyboardEvent) => {
@@ -158,13 +159,28 @@ export default function PedidoPage() {
         0
     );
 
+    const pedidosFiltrados = pedidos.filter((p) => {
+        if (filtro === "execucao") return !p.finalizado;
+        if (filtro === "finalizados") return p.finalizado;
+        return true;
+    });
+
+    const mensagemSemPedidos = () => {
+        if (pedidosFiltrados.length === 0) {
+            if (filtro === "execucao") return "Sem pedidos em execução hoje";
+            if (filtro === "finalizados") return "Sem pedidos finalizados hoje";
+            return "Sem pedidos cadastrados";
+        }
+        return null;
+    };
+
     return (
         <div className="min-h-screen p-6 bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white">
             <h1 className="text-4xl font-extrabold text-green-400 mb-6 text-center">
                 Pedidos 🚀
             </h1>
 
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4">
                 <button
                     onClick={() => setShowModal(true)}
                     className="px-6 py-3 bg-green-500 text-black font-bold rounded-md hover:bg-green-400 transition-all"
@@ -173,57 +189,84 @@ export default function PedidoPage() {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center items-center">
-                {pedidos.map((p) => {
-                    const total = p.itens.reduce(
-                        (acc, item) => acc + item.pizza.preco * item.quantidade,
-                        0
-                    );
-                    return (
-                        <div
-                            key={p.id}
-                            className="w-[360px] h-[420px] bg-black/80 p-5 rounded-lg border border-green-500/30 shadow-md relative flex flex-col justify-evenly">
-                            <div className="flex justify-between items-start mb-3">
-                                <h3 className="font-semibold text-green-300 text-lg">{p.nomeCliente}</h3>
-                                <button onClick={() => editarPedido(p)} className="px-2 py-1 bg-green-500 text-black rounded text-sm hover:bg-green-400 transition-all" >
-                                    ✏️
-                                </button>
-                            </div>
-
-                            <p className="text-sm text-white/70 mb-3">ID: {p.id}</p>
-
-                            <ul className="mb-3 text-sm">
-                                {p.itens.map((item, index) => (
-                                    <li
-                                        key={item.pizza.id}
-                                        className="flex justify-between text-white/80 mb-1"
-                                    >
-                                        {index + 1}. {item.pizza.nome} x {item.quantidade}
-                                        <span>R$ {(item.pizza.preco * item.quantidade).toFixed(2)}</span>
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <div className="text-right font-bold text-green-400 text-base mb-3">
-                                Total: R$ {total.toFixed(2)}
-                            </div>
-
-                            {!p.finalizado ? (
-                                <button
-                                    onClick={() => finalizarPedido(p.id)}
-                                    className="w-full py-2 bg-green-500 text-black font-bold rounded-md text-sm hover:bg-green-400 transition-all"
-                                >
-                                    Finalizar
-                                </button>
-                            ) : (
-                                <span className="text-sm text-gray-400 font-semibold">
-                                    Finalizado ✅
-                                </span>
-                            )}
-                        </div>
-                    );
-                })}
+            <div className="flex justify-center mb-6 gap-4">
+                <button
+                    onClick={() => setFiltro("todos")}
+                    className={`px-4 py-2 rounded-md font-bold ${filtro === "todos" ? "bg-green-500 text-black" : "bg-gray-700 text-white"}`}
+                >
+                    Todos
+                </button>
+                <button
+                    onClick={() => setFiltro("execucao")}
+                    className={`px-4 py-2 rounded-md font-bold ${filtro === "execucao" ? "bg-green-500 text-black" : "bg-gray-700 text-white"}`}
+                >
+                    Em execução
+                </button>
+                <button
+                    onClick={() => setFiltro("finalizados")}
+                    className={`px-4 py-2 rounded-md font-bold ${filtro === "finalizados" ? "bg-green-500 text-black" : "bg-gray-700 text-white"}`}
+                >
+                    Finalizados
+                </button>
             </div>
+
+            {pedidosFiltrados.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center items-center">
+                    {pedidosFiltrados.map((p) => {
+                        const total = p.itens.reduce(
+                            (acc, item) => acc + item.pizza.preco * item.quantidade,
+                            0
+                        );
+                        return (
+                            <div
+                                key={p.id}
+                                className="w-[360px] h-[420px] bg-black/80 p-5 rounded-lg border border-green-500/30 shadow-md relative flex flex-col justify-evenly">
+                                <div className="flex justify-between items-start mb-3">
+                                    <h3 className="font-semibold text-green-300 text-lg">{p.nomeCliente}</h3>
+                                    <button onClick={() => editarPedido(p)} className="px-2 py-1 bg-green-500 text-black rounded text-sm hover:bg-green-400 transition-all" >
+                                        ✏️
+                                    </button>
+                                </div>
+
+                                <p className="text-sm text-white/70 mb-3">ID: {p.id}</p>
+
+                                <ul className="mb-3 text-sm">
+                                    {p.itens.map((item, index) => (
+                                        <li
+                                            key={item.pizza.id}
+                                            className="flex justify-between text-white/80 mb-1"
+                                        >
+                                            {index + 1}. {item.pizza.nome} x {item.quantidade}
+                                            <span>R$ {(item.pizza.preco * item.quantidade).toFixed(2)}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                <div className="text-right font-bold text-green-400 text-base mb-3">
+                                    Total: R$ {total.toFixed(2)}
+                                </div>
+
+                                {!p.finalizado ? (
+                                    <button
+                                        onClick={() => finalizarPedido(p.id)}
+                                        className="w-full py-2 bg-green-500 text-black font-bold rounded-md text-sm hover:bg-green-400 transition-all"
+                                    >
+                                        Finalizar
+                                    </button>
+                                ) : (
+                                    <span className="text-sm text-gray-400 font-semibold">
+                                        Finalizado ✅
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <p className="text-center text-gray-400 font-semibold mt-8">
+                    {mensagemSemPedidos()}
+                </p>
+            )}
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
@@ -285,7 +328,7 @@ export default function PedidoPage() {
                                     min={1}
                                     value={quantidade}
                                     onChange={(e) => setQuantidade(Math.max(1, Number(e.target.value)))}
-                                    className="w-20 p-2 rounded-md bg-gray-800 text-white border border-green-500/20 focus:border-green-400"
+                                    className="w-20 p-2 rounded-md bg-gray-800 text-white border border-green-500/20 focus:border-green-400 appearance-none"
                                 />
                             </div>
 
